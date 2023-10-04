@@ -1,4 +1,7 @@
-use std::env;
+use std::{collections::HashMap, env};
+
+pub mod colors;
+pub mod sprite;
 pub mod spriteset;
 
 fn main() {
@@ -14,9 +17,13 @@ fn main() {
         .list_files()
         .expect("There was a problem while reading the sprite set: {:?}");
 
-    for path in files {
-        dbg!(path.unwrap().file_type());
+    let mut image_color_mapping: HashMap<String, [u8; 3]> = HashMap::new();
+    for f in files {
+        let sprite = sprite::Sprite::from(f.unwrap());
+        let file_name = sprite.file_data.file_name().into_string().unwrap();
+        let average_color = sprite.average_color();
+        image_color_mapping.insert(file_name, average_color);
     }
 
-    println!("Hello, world!");
+    dbg!(image_color_mapping);
 }
