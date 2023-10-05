@@ -1,6 +1,6 @@
 use std::fs::DirEntry;
 
-use image::{GenericImageView, Pixel};
+use image::{imageops::FilterType::Nearest, GenericImageView, Pixel};
 
 pub struct Sprite {
     pub file_data: DirEntry,
@@ -12,9 +12,10 @@ impl Sprite {
 
     // }
 
-    pub fn from(dir_entry: DirEntry) -> Sprite {
-        let img: image::DynamicImage =
-            image::open(dir_entry.path()).expect("Unable to load the image");
+    pub fn from(dir_entry: DirEntry, size: u32) -> Sprite {
+        let img: image::DynamicImage = image::open(dir_entry.path())
+            .expect("Unable to load the image")
+            .resize(size, size, Nearest);
 
         Sprite {
             file_data: dir_entry,

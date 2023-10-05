@@ -1,6 +1,6 @@
-use image::{imageops::FilterType::Nearest, GenericImageView, ImageBuffer, ImageError, Pixel};
+use image::{imageops::FilterType::Nearest, GenericImageView, ImageError, Pixel};
 
-use crate::{colors, spriteset::SpriteSet};
+use crate::{colors, config::Config, spriteset::SpriteSet};
 
 pub struct Render<'a> {
     input_image: image::DynamicImage,
@@ -17,34 +17,24 @@ impl Render<'_> {
         }
     }
 
-    pub fn render_image(self, output_path: String) -> Result<(), ImageError> {
+    pub fn render_image(self, cfg: &Config) -> Result<(), ImageError> {
         let dimensions = self.input_image.dimensions();
-        let default_width = 128;
         let calculated_height =
-            (dimensions.1 as f32 * (default_width as f32 / dimensions.0 as f32)) as u32;
+            (dimensions.1 as f32 * (cfg.img_pixel_width as f32 / dimensions.0 as f32)) as u32;
 
-        dbg!(default_width, calculated_height, dimensions);
-
-        self.render_image_custom(output_path, default_width, calculated_height)
-    }
-
-    pub fn render_image_custom(
-        self,
-        output_path: String,
-        width: u32,
-        height: u32,
-    ) -> Result<(), ImageError> {
         let image_color_mapping = self.sprite_set.get_image_color_mapping();
-        let image_pixel_size = 16;
-        // let mut imgbuf: image::RgbImage = self.input_image
-        let resized_input = self.input_image.resize(width, height, Nearest);
+        let intermediate_img =
+            self.input_image
+                .resize(cfg.img_pixel_width, calculated_height, Nearest);
 
-        let mut imgbuf: image::RgbImage =
-            image::ImageBuffer::new(width * image_pixel_size, height * image_pixel_size);
+        let mut imgbuf: image::RgbImage = image::ImageBuffer::new(
+            cfg.img_pixel_width * cfg.pixel_size,
+            calculated_height * cfg.pixel_size,
+        );
 
-        for x in 0..resized_input.dimensions().0 {
-            for y in 0..resized_input.dimensions().1 {
-                let pixel = resized_input.get_pixel(x, y);
+        for x in 0..intermediate_img.dimensions().0 {
+            for y in 0..intermediate_img.dimensions().1 {
+                let pixel = intermediate_img.get_pixel(x, y);
                 let mut min_dist_img = "";
                 let mut min_dist = f32::MAX;
 
@@ -68,8 +58,8 @@ impl Render<'_> {
                 for sx in 0..sprite.image.dimensions().0 {
                     for sy in 0..sprite.image.dimensions().1 {
                         imgbuf.put_pixel(
-                            (x * image_pixel_size) + sx,
-                            (y * image_pixel_size) + sy,
+                            (x * cfg.pixel_size) + sx,
+                            (y * cfg.pixel_size) + sy,
                             sprite.image.get_pixel(sx, sy).to_rgb(),
                         )
                     }
@@ -77,6 +67,6 @@ impl Render<'_> {
             }
         }
 
-        imgbuf.save(output_path)
+        imgbuf.save(&cfg.output_dest)
     }
 }

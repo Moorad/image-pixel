@@ -1,6 +1,6 @@
 use std::{collections::HashMap, fs};
 
-use crate::sprite::Sprite;
+use crate::{config::Config, sprite::Sprite};
 
 pub struct SpriteSet<'a> {
     set_name: &'a String,
@@ -8,26 +8,27 @@ pub struct SpriteSet<'a> {
 }
 
 impl SpriteSet<'_> {
-    pub fn new(set_name: &String) -> SpriteSet {
+    pub fn new(cfg: &Config) -> SpriteSet {
         let mut ss = SpriteSet {
-            set_name: set_name,
+            set_name: &cfg.sprite_set_name,
             sprites: Vec::new(),
         };
 
-        ss.load_sprites();
+        ss.load_sprites(cfg.pixel_size);
 
         return ss;
     }
 
-    pub fn load_sprites(&mut self) {
+    pub fn load_sprites(&mut self, size: u32) {
         let files: fs::ReadDir = self
             .list_files()
             .expect("There was a problem while reading the sprite set: {:?}");
 
         for f in files {
-            self.sprites.push(Sprite::from(f.expect(
-                "There was a problem while reading the sprite file metadata: {:?}",
-            )))
+            self.sprites.push(Sprite::from(
+                f.expect("There was a problem while reading the sprite file metadata: {:?}"),
+                size,
+            ))
         }
     }
 
