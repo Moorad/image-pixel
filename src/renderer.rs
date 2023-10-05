@@ -2,18 +2,20 @@ use image::{imageops::FilterType::Nearest, GenericImageView, ImageError, Pixel};
 
 use crate::{colors, config::Config, spriteset::SpriteSet};
 
-pub struct Render<'a> {
+pub struct Renderer<'a> {
     input_image: image::DynamicImage,
     sprite_set: SpriteSet<'a>,
 }
 
-impl Render<'_> {
-    pub fn from<'a>(input_file: &'a String, sprite_set: SpriteSet<'a>) -> Render<'a> {
-        let input_image = image::open(input_file).expect("Could not load input image");
+impl Renderer<'_> {
+    pub fn from<'a>(cfg: &'a Config) -> Renderer<'a> {
+        let input_image = image::open(&cfg.input_file).expect("Could not load input image");
 
-        Render {
-            input_image: input_image,
-            sprite_set: sprite_set,
+        let sprite_set = SpriteSet::new(&cfg);
+
+        Renderer {
+            input_image,
+            sprite_set,
         }
     }
 

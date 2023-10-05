@@ -1,6 +1,6 @@
 use clap::Parser;
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[command(name = "imgpx", author = "Moorad")]
 pub struct Config {
     pub input_file: String,
