@@ -1,6 +1,6 @@
 use std::{collections::HashMap, fs};
 
-use crate::{config::Config, sprite::Sprite};
+use crate::{config::Config, progdata::cache, sprite::Sprite};
 
 pub struct SpriteSet<'a> {
     set_name: &'a String,
@@ -32,13 +32,25 @@ impl SpriteSet<'_> {
         }
     }
 
-    pub fn get_image_color_mapping(&self) -> HashMap<String, [u8; 3]> {
+    pub fn get_image_color_mapping(&self, disable_cache: bool) -> HashMap<String, [u8; 3]> {
+        if !disable_cache {
+            let cache_exists = cache::validate(&self.set_name);
+
+            if cache_exists {
+                return cache::load(&self.set_name).expect("Could not read cache {:?}");
+            }
+        }
+
         let mut image_color_mapping: HashMap<String, [u8; 3]> = HashMap::new();
 
         for sprite in &self.sprites {
             let file_name = sprite.file_data.file_name().into_string().unwrap();
             let average_color = sprite.average_color();
             image_color_mapping.insert(file_name, average_color);
+        }
+
+        if !disable_cache {
+            cache::save(&self.set_name, &image_color_mapping).expect("Could not write cache {:?}");
         }
 
         return image_color_mapping;

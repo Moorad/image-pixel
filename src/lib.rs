@@ -1,5 +1,6 @@
 pub mod colors;
 pub mod config;
+pub mod progdata;
 pub mod renderer;
 pub mod sprite;
 pub mod spriteset;

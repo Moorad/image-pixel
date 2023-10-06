@@ -16,4 +16,6 @@ pub struct Config {
     pub pixel_size: u32,
     #[arg(short, long = "size", default_value = "128")]
     pub img_pixel_width: u32,
+    #[arg(long = "no-cache", default_value = "false")]
+    pub disable_caching: bool,
 }

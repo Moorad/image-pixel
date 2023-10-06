@@ -24,7 +24,7 @@ impl Renderer<'_> {
             * (cfg.img_pixel_width as f32 / self.input_image.width() as f32))
             as u32;
 
-        let image_color_mapping = self.sprite_set.get_image_color_mapping();
+        let image_color_mapping = self.sprite_set.get_image_color_mapping(cfg.disable_caching);
         let intermediate_img =
             self.input_image
                 .resize(cfg.img_pixel_width, calculated_height, Nearest);
