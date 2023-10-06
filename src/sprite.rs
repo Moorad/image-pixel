@@ -8,10 +8,6 @@ pub struct Sprite {
 }
 
 impl Sprite {
-    // fn load_from(path: String) -> Sprite {
-
-    // }
-
     pub fn from(dir_entry: DirEntry, size: u32) -> Sprite {
         let img: image::DynamicImage = image::open(dir_entry.path())
             .expect("Unable to load the image")

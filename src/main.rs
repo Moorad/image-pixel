@@ -1,5 +1,8 @@
 use clap::Parser;
-use image_pixel::{config::Config, render};
+use imgpx::{
+    config::Config,
+    render,
+};
 
 fn main() {
     let cfg: Config = Config::parse();

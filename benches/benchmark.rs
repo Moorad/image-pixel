@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use image_pixel::{config::Config, render};
+use imgpx::{config::Config, render};
 
 fn criterion_benchmark(c: &mut Criterion) {
     let base_cfg = Config {
@@ -40,7 +40,7 @@ fn criterion_benchmark(c: &mut Criterion) {
         cfg.input_file = "./the_starry_night.jpg".to_string();
         cfg.img_pixel_width = 64;
 
-        b.iter(|| render(black_box(&base_cfg)))
+        b.iter(|| render(black_box(&cfg)))
     });
 
     small_group.bench_function("mona_lisa", |b| {
@@ -68,7 +68,7 @@ fn criterion_benchmark(c: &mut Criterion) {
         cfg.input_file = "./the_starry_night.jpg".to_string();
         cfg.img_pixel_width = 256;
 
-        b.iter(|| render(black_box(&base_cfg)))
+        b.iter(|| render(black_box(&cfg)))
     });
 
     large_group.bench_function("mona_lisa", |b| {
