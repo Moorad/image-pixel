@@ -4,7 +4,7 @@ use clap::Parser;
 #[command(name = "imgpx", author = "Moorad")]
 pub struct Config {
     pub input_file: String,
-    pub sprite_set_name: String,
+    pub sprite_set_path: String,
     #[arg(
         short = 'o',
         long = "out",

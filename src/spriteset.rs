@@ -3,14 +3,14 @@ use std::{collections::HashMap, fs};
 use crate::{config::Config, progdata::cache, sprite::Sprite};
 
 pub struct SpriteSet<'a> {
-    set_name: &'a String,
+    set_path: &'a String,
     pub sprites: Vec<Sprite>,
 }
 
 impl SpriteSet<'_> {
     pub fn new(cfg: &Config) -> SpriteSet {
         let mut ss = SpriteSet {
-            set_name: &cfg.sprite_set_name,
+            set_path: &cfg.sprite_set_path,
             sprites: Vec::new(),
         };
 
@@ -34,10 +34,11 @@ impl SpriteSet<'_> {
 
     pub fn get_image_color_mapping(&self, disable_cache: bool) -> HashMap<String, [u8; 3]> {
         if !disable_cache {
-            let cache_exists = cache::validate(&self.set_name);
+            let set_name = &self.set_path.split("/").last().unwrap();
+            let cache_exists = cache::validate(&set_name);
 
             if cache_exists {
-                return cache::load(&self.set_name).expect("Could not read cache {:?}");
+                return cache::load(&set_name).expect("Could not read cache {:?}");
             }
         }
 
@@ -50,7 +51,8 @@ impl SpriteSet<'_> {
         }
 
         if !disable_cache {
-            cache::save(&self.set_name, &image_color_mapping).expect("Could not write cache {:?}");
+            let set_name = &self.set_path.split("/").last().unwrap();
+            cache::save(&set_name, &image_color_mapping).expect("Could not write cache {:?}");
         }
 
         return image_color_mapping;
@@ -69,8 +71,7 @@ impl SpriteSet<'_> {
     }
 
     pub fn list_files(&self) -> Result<fs::ReadDir, std::io::Error> {
-        let sn = self.set_name;
-        fs::read_dir(format!("./sprites/{sn}"))
+        fs::read_dir(self.set_path)
     }
 
     pub fn get_sprite(&self, sprite_name: String) -> Option<&Sprite> {

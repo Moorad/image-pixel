@@ -6,7 +6,7 @@ use imgpx::{config::Config, render};
 fn criterion_benchmark(c: &mut Criterion) {
     let base_cfg = Config {
         input_file: "./the_starry_night.jpg".to_string(),
-        sprite_set_name: "minecraft-old".to_string(),
+        sprite_set_path: "minecraft-old".to_string(),
         output_dest: "./out.png".to_string(),
         pixel_size: 16,
         img_pixel_width: 128,
