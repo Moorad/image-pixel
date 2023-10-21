@@ -11,7 +11,7 @@ impl Sprite {
     pub fn from(dir_entry: DirEntry, size: u32) -> Sprite {
         let img: image::DynamicImage = image::open(dir_entry.path())
             .expect("Unable to load the image")
-            .resize(size, size, Nearest);
+            .resize_to_fill(size, size, Nearest);
 
         Sprite {
             file_data: dir_entry,
