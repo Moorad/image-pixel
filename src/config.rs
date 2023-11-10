@@ -12,6 +12,8 @@ pub struct Config {
         default_value = "./out.png"
     )]
     pub output_dest: String,
+    #[arg(short = 'z', long = "zipped-set", default_value = "false")]
+    pub zip_sprite_set: bool,
     #[arg(short, long = "pixel-size", default_value = "16")]
     pub pixel_size: u32,
     #[arg(short, long = "size", default_value = "128")]

@@ -8,10 +8,14 @@ pub struct Renderer<'a> {
 }
 
 impl Renderer<'_> {
-    pub fn from<'a>(cfg: &'a Config) -> Renderer<'a> {
-        let input_image = image::open(&cfg.input_file).expect("Could not load input image");
+    pub fn from<'a>(
+        input_file: &'a str,
+        sprite_set_path: &'a str,
+        pixel_size: u32,
+    ) -> Renderer<'a> {
+        let input_image = image::open(input_file).expect("Could not load input image");
 
-        let sprite_set = SpriteSet::new(&cfg);
+        let sprite_set = SpriteSet::new(sprite_set_path, pixel_size);
 
         Renderer {
             input_image,

@@ -8,7 +8,15 @@ use imgpx::{
 fn main() {
     let cfg: Config = Config::parse();
 
-    progdata::init().expect("Unable to create program data folder at HOME directory (Linux) or APPDATA folder (Windows), {:?}");
+    progdata::init(&cfg)
+	.expect("Unable to create program data folder at HOME directory (Linux) or APPDATA folder (Windows), {:?}");
 
-    render(&cfg);
+    let sprite_set_path = match cfg.zip_sprite_set {
+        true => progdata::zip::unzip(&cfg.sprite_set_path).unwrap(),
+        false => cfg.sprite_set_path.clone(),
+    };
+
+    render(&sprite_set_path, &cfg);
+
+    progdata::tear_down().expect("Unable to clean up program data, {:?}");
 }

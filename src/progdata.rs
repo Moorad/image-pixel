@@ -1,5 +1,7 @@
 use std::{fs, path::Path};
 
+use crate::config::Config;
+
 fn get_home_dir() -> String {
     #[cfg(unix)]
     return std::env::var("HOME").expect("No HOME directory");
@@ -8,14 +10,28 @@ fn get_home_dir() -> String {
     return std::env::var("APP_DATA").expect("No APP_DATA directory");
 }
 
-pub fn init() -> Result<(), std::io::Error> {
-    let binding = get_home_dir() + "/.imgpx";
-    let path = Path::new(binding.as_str());
+fn safe_create_dir(dir: String) -> Result<(), std::io::Error> {
+    let path = Path::new(dir.as_str());
+
     if !path.exists() {
-        return fs::create_dir(get_home_dir() + "/.imgpx");
+        return fs::create_dir(dir);
     }
 
     return Ok(());
+}
+
+pub fn init(cfg: &Config) -> Result<(), std::io::Error> {
+    safe_create_dir(get_home_dir() + "/.imgpx")?;
+
+    if cfg.zip_sprite_set {
+        safe_create_dir(get_home_dir() + "/.imgpx/temp")?;
+    }
+
+    return Ok(());
+}
+
+pub fn tear_down() -> Result<(), std::io::Error> {
+    return fs::remove_dir_all(get_home_dir() + "/.imgpx/temp");
 }
 
 pub mod cache {
@@ -44,5 +60,39 @@ pub mod cache {
     {
         let file = File::open(get_home_dir() + "/.imgpx/" + cache_name + ".json").unwrap();
         serde_json::from_reader(file)
+    }
+}
+
+pub mod zip {
+    use std::{
+        fs::{self, File},
+        io::{self, Error},
+    };
+
+    use crate::progdata::get_home_dir;
+
+    pub fn unzip(zip_file: &str) -> Result<String, Error> {
+        let fname = std::path::Path::new(zip_file);
+        let zip_file = File::open(fname).unwrap();
+        let mut archive = zip::ZipArchive::new(zip_file).unwrap();
+
+        for i in 0..archive.len() {
+            let mut file = archive.by_index(i).unwrap();
+
+            let output = match file.enclosed_name() {
+                Some(path) => path.to_owned(),
+                None => continue,
+            };
+
+            // fs::create_dir(path)
+            let mut outfile = fs::File::create(
+                get_home_dir() + "/.imgpx/temp/" + output.file_name().unwrap().to_str().unwrap(),
+            )
+            .unwrap();
+
+            io::copy(&mut file, &mut outfile)?;
+        }
+
+        return Ok(get_home_dir() + "/.imgpx/temp");
     }
 }

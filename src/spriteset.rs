@@ -1,20 +1,20 @@
 use std::{collections::HashMap, fs};
 
-use crate::{config::Config, progdata::cache, sprite::Sprite};
+use crate::{progdata::cache, sprite::Sprite};
 
 pub struct SpriteSet<'a> {
-    set_path: &'a String,
+    set_path: &'a str,
     pub sprites: Vec<Sprite>,
 }
 
 impl SpriteSet<'_> {
-    pub fn new(cfg: &Config) -> SpriteSet {
+    pub fn new(sprite_set_path: &str, pixel_size: u32) -> SpriteSet {
         let mut ss = SpriteSet {
-            set_path: &cfg.sprite_set_path,
+            set_path: sprite_set_path,
             sprites: Vec::new(),
         };
 
-        ss.load_sprites(cfg.pixel_size);
+        ss.load_sprites(pixel_size);
 
         return ss;
     }

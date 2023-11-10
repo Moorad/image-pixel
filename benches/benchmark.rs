@@ -11,6 +11,7 @@ fn criterion_benchmark(c: &mut Criterion) {
         pixel_size: 16,
         img_pixel_width: 128,
         disable_caching: false,
+        zip_sprite_set: false,
     };
 
     let mut default_group = c.benchmark_group("default");
