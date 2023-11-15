@@ -20,6 +20,16 @@ fn safe_create_dir(dir: String) -> Result<(), std::io::Error> {
     return Ok(());
 }
 
+fn safe_delete_dir(dir: String) -> Result<(), std::io::Error> {
+    let path = Path::new(dir.as_str());
+
+    if path.exists() {
+        return fs::remove_dir_all(dir);
+    }
+
+    return Ok(());
+}
+
 pub fn init(cfg: &Config) -> Result<(), std::io::Error> {
     safe_create_dir(get_home_dir() + "/.imgpx")?;
 
@@ -31,7 +41,7 @@ pub fn init(cfg: &Config) -> Result<(), std::io::Error> {
 }
 
 pub fn tear_down() -> Result<(), std::io::Error> {
-    return fs::remove_dir_all(get_home_dir() + "/.imgpx/temp");
+    return safe_delete_dir(get_home_dir() + "/.imgpx/temp");
 }
 
 pub mod cache {
