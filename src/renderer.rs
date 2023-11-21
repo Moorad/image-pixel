@@ -1,3 +1,8 @@
+use std::{
+    fs,
+    io::{stdout, Write},
+};
+
 use image::{imageops::FilterType::Nearest, GenericImageView, Pixel};
 
 use crate::{colors, config::Config, spriteset::SpriteSet};
@@ -24,12 +29,14 @@ impl Renderer<'_> {
     }
 
     pub fn render_image(self, cfg: &Config) -> Result<(), image::ImageError> {
+        let mut stdout = stdout();
+
         let calculated_height = (self.input_image.height() as f32
             * (cfg.img_pixel_width as f32 / self.input_image.width() as f32))
             as u32;
 
         let image_color_mapping = self.sprite_set.get_image_color_mapping(cfg.disable_caching);
-        let intermediate_img =
+        let scaled_down_img =
             self.input_image
                 .resize(cfg.img_pixel_width, calculated_height, Nearest);
 
@@ -38,9 +45,9 @@ impl Renderer<'_> {
             calculated_height * cfg.pixel_size,
         );
 
-        for x in 0..intermediate_img.width() {
-            for y in 0..intermediate_img.height() {
-                let pixel = intermediate_img.get_pixel(x, y);
+        for x in 0..scaled_down_img.width() {
+            for y in 0..scaled_down_img.height() {
+                let pixel = scaled_down_img.get_pixel(x, y);
                 let mut min_dist_img = &String::new();
                 let mut min_dist = f32::MAX;
 
@@ -71,8 +78,32 @@ impl Renderer<'_> {
                     }
                 }
             }
+
+            let processed_pixels = x as f32 * (scaled_down_img.height() as f32 - 1.0);
+            let total_pixels =
+                (scaled_down_img.width() as f32 - 1.0) * (scaled_down_img.height() as f32 - 1.0);
+
+            stdout
+                .write(
+                    format!(
+                        "\r🖼️ Processing image: {}% ({}/{})",
+                        ((processed_pixels / total_pixels) * 100.0).floor(),
+                        processed_pixels,
+                        total_pixels
+                    )
+                    .as_bytes(),
+                )
+                .unwrap();
+
+            stdout.flush().unwrap();
         }
 
+        println!();
+
+        println!(
+            "💾 Saving image: {:?}",
+            fs::canonicalize(&cfg.output_dest).unwrap()
+        );
         imgbuf.save(&cfg.output_dest)
     }
 }

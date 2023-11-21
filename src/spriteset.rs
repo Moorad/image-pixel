@@ -1,4 +1,8 @@
-use std::{collections::HashMap, fs};
+use std::{
+    collections::HashMap,
+    fs,
+    io::{stdout, Write},
+};
 
 use crate::{progdata::cache, sprite::Sprite};
 
@@ -43,12 +47,29 @@ impl SpriteSet<'_> {
         }
 
         let mut image_color_mapping: HashMap<String, [u8; 3]> = HashMap::new();
-
+        let mut stdout = stdout();
         for sprite in &self.sprites {
             let file_name = sprite.file_data.file_name().into_string().unwrap();
             let average_color = sprite.average_color();
             image_color_mapping.insert(file_name, average_color);
+
+            stdout
+                .write(
+                    format!(
+                        "\r🎨 Calculating colour averages: {}% ({}/{})",
+                        ((image_color_mapping.len() as f32 / self.sprites.len() as f32) * 100.0)
+                            .floor(),
+                        image_color_mapping.len(),
+                        self.sprites.len()
+                    )
+                    .as_bytes(),
+                )
+                .unwrap();
+
+            stdout.flush().unwrap();
         }
+
+        println!();
 
         if !disable_cache {
             let set_name = &self.set_path.split("/").last().unwrap();
